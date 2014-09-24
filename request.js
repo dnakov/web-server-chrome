@@ -1,4 +1,4 @@
-(function() {
+module.exports = (function() {
     function Request(opts) {
         this.method = opts.method
         this.uri = opts.uri
@@ -36,5 +36,5 @@
         }
     }
 
-    window.Request = Request
+    return Request;
 })()

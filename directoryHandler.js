@@ -1,4 +1,7 @@
-(function(){
+var _ = require('lodash');
+var BaseHandler = require('./basehandler.js');
+
+module.exports = (function(){
 
     function getEntryFile( entry, callback ) {
 
@@ -276,7 +279,7 @@
     }, BaseHandler.prototype)
 
 
-
-    window.DirectoryEntryHandler = DirectoryEntryHandler
+    return DirectoryEntryHandler;
+    // window.DirectoryEntryHandler = DirectoryEntryHandler
 
 })()

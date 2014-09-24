@@ -1,4 +1,4 @@
-(function() {
+module.exports = (function() {
     function HTTPConnection(stream) {
         this.stream = stream
         this.curRequest = null
@@ -65,7 +65,5 @@
             this.onRequestCallback(request)
         }
     }
-
-    window.HTTPConnection = HTTPConnection;
-
+    return HTTPConnection;
 })()

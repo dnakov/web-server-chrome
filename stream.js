@@ -1,4 +1,17 @@
-(function() {
+var chrome = chrome || {
+    sockets: {
+        tcp: {
+            onReceive: {
+                addListener: function() {}
+            },
+            onReceiveError: {
+                addListener: function() {}
+            }
+        }
+    }
+};
+
+module.exports = (function() {
 
     var peerSockMap = {}
 
@@ -14,6 +27,8 @@
 
 
     var sockets = chrome.sockets
+    var Buffer = require('./buffer.js');
+
     function IOStream(sockId) {
         this.sockId = sockId
         peerSockMap[this.sockId] = this
@@ -157,6 +172,6 @@
         }
     }
 
-    window.IOStream = IOStream;
+    return IOStream;
 
 })()
