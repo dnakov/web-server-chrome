@@ -1,17 +1,5 @@
-var chrome = chrome || {
-    sockets: {
-        tcp: {
-            onReceive: {
-                addListener: function() {}
-            },
-            onReceiveError: {
-                addListener: function() {}
-            }
-        }
-    }
-};
-
-module.exports = (function() {
+var utils = require('./utils.js');
+var Buffer_ = require('./buffer.js');
 
     var peerSockMap = {}
 
@@ -21,21 +9,26 @@ module.exports = (function() {
             peerSockMap[sockId].onReadTCP(info)
         }
     }
+    if(chrome.sockets != null) {
+        chrome.sockets.tcp.onReceive.addListener( onTCPReceive );
+        chrome.sockets.tcp.onReceiveError.addListener( onTCPReceive );
+    }
 
-    chrome.sockets.tcp.onReceive.addListener( onTCPReceive )
-    chrome.sockets.tcp.onReceiveError.addListener( onTCPReceive )
+module.exports = (function() {
 
 
+
+
+    
     var sockets = chrome.sockets
-    var Buffer = require('./buffer.js');
 
     function IOStream(sockId) {
         this.sockId = sockId
         peerSockMap[this.sockId] = this
         this.readCallback = null
         this.readUntilDelimiter = null
-        this.readBuffer = new Buffer
-        this.writeBuffer = new Buffer
+        this.readBuffer = new Buffer_()
+        this.writeBuffer = new Buffer_()
         this.writing = false
         this.pleaseReadBytes = null
 
@@ -122,7 +115,7 @@ module.exports = (function() {
             //console.log('checkBuffer')
             if (this.readUntilDelimiter) {
                 var buf = this.readBuffer.flatten()
-                var str = arrayBufferToString(buf)
+                var str = utils.arrayBufferToString(buf)
                 var idx = str.indexOf(this.readUntilDelimiter)
                 if (idx != -1) {
                     var callback = this.readCallback

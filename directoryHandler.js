@@ -1,7 +1,9 @@
 var _ = require('lodash');
-var BaseHandler = require('./basehandler.js');
+var BaseHandler = new (require('./basehandler.js'))();
+var entryCache = require('./entrycache.js').entryCache;
+var entryFileCache = require('./entrycache.js').entryFileCache;
 
-module.exports = (function(){
+module.exports = function(fileSystem) {
 
     function getEntryFile( entry, callback ) {
 
@@ -12,7 +14,7 @@ module.exports = (function(){
             callback(inCache); return }
         
         entry.file( function(file) {
-            entryFileCache.set(cacheKey, file)
+            // entryFileCache.set(cacheKey, file)
             callback(file)
         }, function(evt) {
             console.error('entry.file() error',evt)
@@ -49,7 +51,7 @@ module.exports = (function(){
 
             this.setHeader('accept-ranges','bytes')
             this.setHeader('connection','keep-alive')
-            if (! window.fs) {
+            if (! fileSystem) {
                 this.write("error: need to select a directory to serve",500)
                 return
             }
@@ -57,7 +59,7 @@ module.exports = (function(){
 
             // strip '/' off end of path
 
-            fs.getByPath(this.request.path, this.onEntry.bind(this))
+            fileSystem.getByPath(this.request.path, this.onEntry.bind(this))
         },
         doReadChunk: function() {
             //console.log(this.request.connection.stream.sockId, 'doReadChunk', this.fileOffset)
@@ -220,7 +222,7 @@ module.exports = (function(){
                 this.isDirectoryListing = true
 
                 function onreaderr(evt) {
-                    entryCache.unset(this.entry.filesystem.name + this.entry.fullPath)
+                    this.entryCache.unset(this.entry.filesystem.name + this.entry.fullPath)
                     console.error('error reading dir',evt)
                     this.request.connection.close()
                 }
@@ -282,4 +284,4 @@ module.exports = (function(){
     return DirectoryEntryHandler;
     // window.DirectoryEntryHandler = DirectoryEntryHandler
 
-})()
+}

@@ -97,7 +97,7 @@ module.exports = (function() {
         }
     }
     return Buffer;
-});
+})();
     // function test_buffer() {
     //     var b = new Buffer;
     //     b.add( new Uint8Array([1,2,3,4]).buffer )

@@ -1,3 +1,6 @@
+var utils = require('./utils.js');
+var Request = require('./request.js');
+
 module.exports = (function() {
     function HTTPConnection(stream) {
         this.stream = stream
@@ -17,7 +20,7 @@ module.exports = (function() {
         write: function(data) {
             if (typeof data == 'string') {
                 // convert to arraybuffer
-                var buf = stringToUint8Array(data).buffer
+                var buf = utils.stringToUint8Array(data).buffer
             } else {
                 var buf = data
             }
@@ -34,7 +37,7 @@ module.exports = (function() {
         },
         onHeaders: function(data) {
             // TODO - http headers are Latin1, not ascii...
-            var datastr = arrayBufferToString(data)
+            var datastr = utils.arrayBufferToString(data)
             var lines = datastr.split('\r\n')
             var firstline = lines[0]
             var flparts = firstline.split(' ')
@@ -42,7 +45,7 @@ module.exports = (function() {
             var uri = flparts[1]
             var version = flparts[2]
 
-            var headers = parseHeaders(lines.slice(1,lines.length-2))
+            var headers = this.parseHeaders(lines.slice(1,lines.length-2))
             this.curRequest = new Request({headers:headers,
                                            method:method,
                                            uri:uri,
@@ -63,6 +66,16 @@ module.exports = (function() {
         },
         onRequest: function(request) {
             this.onRequestCallback(request)
+        },
+        parseHeaders: function(lines) {
+            var headers = {}
+            // TODO - multi line headers?
+            for (var i=0;i<lines.length;i++) {
+                var l = lines[i].split(':')
+                headers[l[0].toLowerCase()] = l[1].trim()
+            }
+            return headers
+
         }
     }
     return HTTPConnection;

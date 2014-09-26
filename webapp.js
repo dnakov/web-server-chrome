@@ -1,9 +1,9 @@
-var chrome = chrome || {};
+
 var IOStream = require('./stream.js');
 var HTTPConnection = require('./connection.js');
 
 module.exports = (function(){
-    var sockets = chrome.sockets || {};
+    var sockets = chrome.sockets;
 
     function WebApplication(opts) {
         this.opts = opts
@@ -27,13 +27,14 @@ module.exports = (function(){
             console.error(data)
             this.lasterr = data
         },
-        stop: function() {
+        stop: function(cb) {
             sockets.tcp.disconnect(this.sockInfo.socketId)
             this.stopped = true
+            cb();
         },
-        start: function() {
+        start: function(cb) {
             sockets.tcpServer.create({name:"listenSocket"},function(sockInfo) {
-                this.sockInfo = sockInfo
+                this.sockInfo = sockInfo;
                 sockets.tcpServer.listen(this.sockInfo.socketId,
                                          this.host,
                                          this.port,
@@ -41,9 +42,11 @@ module.exports = (function(){
                                   if (result < 0) {
                                       this.error({message:'unable to bind to port',
                                                   errno:result})
+                                      cb(this.lasterr);
                                   } else {
                                       console.log('Listening on',this.port,result)
                                       this.bindAcceptCallbacks()
+                                      cb(null,this.sockInfo.socketId);
                                   }
                               }.bind(this))
             }.bind(this));
